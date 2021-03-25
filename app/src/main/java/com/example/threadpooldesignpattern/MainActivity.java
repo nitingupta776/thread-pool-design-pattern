@@ -7,6 +7,7 @@ import android.os.Process;
 import android.util.Log;
 
 import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -130,14 +131,23 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 int j = rand.nextInt(2);
+                int finalI = i;
                 if (j % 2 == 0) {
                     // This one contains Thread Priority: -2
-                    group1Future = executor.submit(new PrioritizedTask(i, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_FOREGROUND,2));
-                    group1Queue.add(new PrioritizedTask(i, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_FOREGROUND,2));
+                    group1Future = executor.submit(() -> {
+                        group1Queue.add(new PrioritizedTask(finalI, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_FOREGROUND,1));
+                        return null;
+                    });
+                    //group1Future = executor.submit(new PrioritizedTask(i, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_FOREGROUND,2));
+
                 } else {
                     // This one contains Thread Priority: 10
-                    group2Future = executor.submit(new PrioritizedTask(i, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_FOREGROUND,2));
-                    group2Queue.add(new PrioritizedTask(i, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_BACKGROUND,1));
+                    group2Future = executor.submit(() -> {
+                        group2Queue.add(new PrioritizedTask(finalI, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_BACKGROUND,2));
+                        return null;
+                    });
+                   // group2Future = executor.submit(new PrioritizedTask(i, System.currentTimeMillis(),20, Process.THREAD_PRIORITY_FOREGROUND,2));
+
                 }
             }
         }
